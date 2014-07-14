@@ -79,7 +79,8 @@
 			
 			// read feed into SimpleXML object
 			$sxml = simplexml_load_file( $feedURL );
-
+			
+			$video_array = array();
 			// iterate over entries in feed
 			foreach ( $sxml->entry as $entry ) {
 
@@ -140,31 +141,30 @@
 		}
 		
 		// Saving the feed into post
-		function ac_insert_post($data) {		
+		function ac_insert_post( $data ) {		
 			// Getting all posts
-			$args = array( 'order'=> 'DESC', 'orderby' => 'date' );
-			$postslist = get_posts( $args );
-			foreach ( $postslist as $post ) :
-			  setup_postdata( $post );
-			  $all_video_ids[] = get_post_meta( $post->ID, 'ac_youtube_video_id', true );
-			endforeach; 
-			wp_reset_postdata();
-			foreach($data as $post) {			
-				if( ! in_array( $post['video_id'][0], $all_video_ids ) ) {				
+			foreach($data as $insert_post) {		
+				// Query for the meta key and meta value	
+				global $wpdb;
+				$meta_key = 'ac_youtube_video_id';
+				$insert_post_video_id = $insert_post['video_id'][0];
+				$table_name = $wpdb->prefix . 'postmeta';
+				$result = $wpdb->get_results( "SELECT meta_value FROM  $table_name WHERE meta_key='$meta_key' AND meta_value='$insert_post_video_id'" );
+				if( count($result)==0 ) {				
 					// Getting category id
-					$category_id = get_cat_ID( $post['category'][0] );
+					$category_id = get_cat_ID( $insert_post['category'][0] );
 					// Create post object
 					$user_id = get_current_user_id();
 					$my_post = array(
-					  'post_title'    => $post['title'][0],
-					  'post_content'  => $post['description'][0],
+					  'post_title'    => $insert_post['title'][0],
+					  'post_content'  => $insert_post['description'][0],
 					  'post_status'   => 'publish',
 					  'post_author'   => 1,
 					  'post_category' => array( $category_id ) 
 					);
 					// Insert the post into the database
 					$post_id = wp_insert_post( $my_post );					
-					update_post_meta( $post_id, 'ac_youtube_video_id', $post['video_id'][0] );
+					update_post_meta( $post_id, 'ac_youtube_video_id', $insert_post_video_id );
 				}
 			}		
 		}
