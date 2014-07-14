@@ -1,0 +1,174 @@
+<?php
+/**
+ * Plugin Name: Youtube Feed to WP Post
+ * Plugin URI: http://appzcoder.com
+ * Description: A wordpress plugin which is simply allow you to import your youtube video feed as a post within every 30 minutes.
+ * Version: 1.0
+ * Author: Sohel Amin
+ * Author URI: http://appzcoder.com
+ * License: GPL2
+ */
+
+/*  Copyright 2014  Sohel Amin  (email : sohelamincse@gmail.com)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License, version 2, as 
+    published by the Free Software Foundation.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/ 
+	require('ac-options.php');
+	
+	class AppzCoder_Youtube_Feed_To_WP_Post {	
+	
+		public function __construct() {
+			// Active or deactive hook upon plugin activation/deactivation
+			register_activation_hook( __FILE__, array( $this, 'ac_yf2wp_activate' ) );
+			register_deactivation_hook( __FILE__, array( $this, 'ac_yf2wp_deactivate' ) );			
+			// Adding new schedule
+			add_filter( 'cron_schedules', array( $this, 'ac_add_new_cron_schedule' ) );	
+			// Adding custom hook
+			add_action( 'ac_custom_youtube_feed_import', array( $this, 'ac_do_youtube_feed_import' ) );
+		}
+
+		public static function init() {
+			static $instance = false;
+			if ( ! $instance ) {
+				$instance = new AppzCoder_Youtube_Feed_To_WP_Post();
+			}
+			return $instance;
+		}
+	
+		// Setting up cronjob time period
+		public function ac_add_new_cron_schedule( $schedules )	{
+		   $schedules['every_thirty_min'] = array ( 
+				'interval' => 1800,
+				'display'  => __('Every 30 Minutes')
+			);
+		   return $schedules;
+		}
+		
+		// Calling cronjob schedule
+		public function ac_yf2wp_activate()	{
+			if( !wp_next_scheduled( 'ac_custom_youtube_feed_import' ) ) {
+				wp_schedule_event( time(), 'every_thirty_min', 'ac_custom_youtube_feed_import' );
+			}
+		}
+
+		// Destroy the schedule
+		public function ac_yf2wp_deactivate() {
+			if( false !== ( $time = wp_next_scheduled( 'ac_custom_youtube_feed_import' ) ) ) {
+			   wp_clear_scheduled_hook( 'ac_custom_youtube_feed_import' );
+			}
+		}	
+		
+		/* Start the crojob main task */
+		public function ac_do_youtube_feed_import() {
+			
+			$youtube_id = get_option('ac_youtube_user_id'); 
+			//$youtube_id = 'UCnllbLq1u_SxHXzkauxZsPw'; 
+			// set feed URL
+			$feedURL = 'http://gdata.youtube.com/feeds/api/users/' .$youtube_id. '/uploads?v=2';
+			
+			// read feed into SimpleXML object
+			$sxml = simplexml_load_file( $feedURL );
+
+			// iterate over entries in feed
+			foreach ( $sxml->entry as $entry ) {
+
+				// get nodes in media: namespace for media information
+				$media = $entry->children('http://search.yahoo.com/mrss/');
+				// get video player URL
+				$attrs = $media->group->player->attributes();
+				$watch = $attrs['url']; 
+				// get video player id
+				$yt = $media->children( 'http://gdata.youtube.com/schemas/2007' );
+				$youtubeid = $yt->videoid;		  
+				// get video thumbnail
+				$attrs = $media->group->thumbnail[0]->attributes();
+				$thumbnail = $attrs['url']; 
+				
+				// get video published date
+				$date = date('Y-m-d H:i:s', strtotime($entry->published));	
+				
+				// get <yt:duration> node for video length
+				$yt = $media->children('http://gdata.youtube.com/schemas/2007');
+				$attrs = $yt->duration->attributes();
+				$length = $attrs['seconds']; 
+
+				// get <yt:stats> node for viewer statistics
+				$yt = $entry->children('http://gdata.youtube.com/schemas/2007');
+				$attrs = $yt->statistics->attributes();
+				$viewCount = $attrs['viewCount']; 
+
+				// get <gd:rating> node for video ratings
+				$gd = $entry->children('http://schemas.google.com/g/2005'); 
+				if ( $gd->rating ) {
+					$attrs = $gd->rating->attributes();
+					$rating = $attrs['average']; 
+				} else {
+					$rating = 0; 
+				} 
+			
+				$videos['title'] = $this->ac_xml2array( $media->group->title );
+				$videos['video_id'] = $this->ac_xml2array( $youtubeid);
+				$videos['description'] = $this->ac_xml2array( $media->group->description );
+				$videos['view_count'] = $this->ac_xml2array( $viewCount );
+				$videos['date'] = $date;
+				$videos['category'] = $this->ac_xml2array( $media->group->category );
+				$videos['keyword'] = $this->ac_xml2array( $media->group->keyword );
+				
+				$video_array[] = $videos;
+			}
+			$result = $this->ac_insert_post( $video_array );
+			return $result;
+		}
+		/* End the crojob main task */
+		
+		// For xml object to array conversion
+		function ac_xml2array ( $result, $out = array () ) {
+			foreach ( (array) $result as $index => $node )
+				$out[$index] = ( is_object ( $node ) ) ? $this->ac_xml2array ( $node ) : $node;
+			return $out;
+		}
+		
+		// Saving the feed into post
+		function ac_insert_post($data) {		
+			// Getting all posts
+			$args = array( 'order'=> 'DESC', 'orderby' => 'date' );
+			$postslist = get_posts( $args );
+			foreach ( $postslist as $post ) :
+			  setup_postdata( $post );
+			  $all_video_ids[] = get_post_meta( $post->ID, 'ac_youtube_video_id', true );
+			endforeach; 
+			wp_reset_postdata();
+			foreach($data as $post) {			
+				if( ! in_array( $post['video_id'][0], $all_video_ids ) ) {				
+					// Getting category id
+					$category_id = get_cat_ID( $post['category'][0] );
+					// Create post object
+					$user_id = get_current_user_id();
+					$my_post = array(
+					  'post_title'    => $post['title'][0],
+					  'post_content'  => $post['description'][0],
+					  'post_status'   => 'publish',
+					  'post_author'   => 1,
+					  'post_category' => array( $category_id ) 
+					);
+					// Insert the post into the database
+					$post_id = wp_insert_post( $my_post );					
+					update_post_meta( $post_id, 'ac_youtube_video_id', $post['video_id'][0] );
+				}
+			}		
+		}
+		
+	}	
+
+$youtube_feed_2_wp_post = AppzCoder_Youtube_Feed_To_WP_Post::init();
