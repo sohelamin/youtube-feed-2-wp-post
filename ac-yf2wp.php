@@ -36,6 +36,20 @@
 			add_filter( 'cron_schedules', array( $this, 'ac_add_new_cron_schedule' ) );	
 			// Adding custom hook
 			add_action( 'ac_custom_youtube_feed_import', array( $this, 'ac_do_youtube_feed_import' ) );
+			// Adding meta box
+			add_action( 'add_meta_boxes', function() {
+				add_meta_box( 'ac_post_youtube_video_id', 'Youtube Video ID', array( $this, 'ac_youtube_video_id' ), 'post', 'normal', 'high' );
+			});
+			// Saving meta box data
+			add_action( 'save_post', function($id) {
+				if( isset($_POST['ac_youtube_video_id'])){
+					update_post_meta(
+						$id,
+						'ac_youtube_video_id',
+						strip_tags($_POST['ac_youtube_video_id'])
+					);
+				}
+			});		
 		}
 
 		public static function init() {
@@ -140,6 +154,18 @@
 			return $out;
 		}
 		
+		// Custom meta for video id	
+		function ac_youtube_video_id( $post )
+		{		
+			$video_id = get_post_meta($post->ID, 'ac_youtube_video_id', true);
+			?>
+			<p>
+				<label for="ac_youtube_video_id">Youtube Video ID: </label>
+				<input type="text" name="ac_youtube_video_id" id="ac_youtube_video_id" value="<?php echo esc_attr($video_id); ?>" />
+			</p>
+			<?php
+		}				
+	
 		// Saving the feed into post
 		function ac_insert_post( $data ) {		
 			// Getting all posts
