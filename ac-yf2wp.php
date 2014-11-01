@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Youtube Feed to WP Post
+ * Plugin Name: YouTube Feed to WP Post
  * Plugin URI: http://appzcoder.com
- * Description: A wordpress plugin which is simply allow you to import your youtube video feed as a post within every 30 minutes.
- * Version: 1.0
+ * Description: A wordpress plugin which is simply allow you to import your YouTube video feed as a post within a selective time.
+ * Version: 1.1
  * Author: Sohel Amin
  * Author URI: http://appzcoder.com
  * License: GPL2
@@ -24,8 +24,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */ 
-	require('ac-options.php');
-	
+require_once('ac-options.php');
+
+if (!class_exists('AppzCoder_Youtube_Feed_To_WP_Post')) {
+
 	class AppzCoder_Youtube_Feed_To_WP_Post {	
 	
 		public function __construct() {
@@ -49,7 +51,9 @@
 						strip_tags($_POST['ac_youtube_video_id'])
 					);
 				}
-			});		
+			});	
+			// Adding shortcode for preview the youtube video on frontend
+			add_shortcode( 'ac_show_youtube_video', array( $this, 'ac_do_shortcode_func' ) );	
 		}
 
 		public static function init() {
@@ -66,13 +70,23 @@
 				'interval' => 1800,
 				'display'  => __('Every 30 Minutes')
 			);
-		   return $schedules;
+			$schedules['weekly'] = array(
+				'interval' => 604800,
+				'display' => __('Once Weekly')
+			);
+			$schedules['monthly'] = array(
+				'interval' => 2635200,
+				'display' => __('Once a month')
+			);
+			return $schedules;
 		}
 		
 		// Calling cronjob schedule
-		public function ac_yf2wp_activate()	{
+		public function ac_yf2wp_activate( $recurrence ) {				
 			if( !wp_next_scheduled( 'ac_custom_youtube_feed_import' ) ) {
-				wp_schedule_event( time(), 'every_thirty_min', 'ac_custom_youtube_feed_import' );
+				if(empty($recurrence)) { $recurrence='every_thirty_min'; }
+				update_option( 'ac_cron_job_schedule', $recurrence );
+				wp_schedule_event( time(), $recurrence, 'ac_custom_youtube_feed_import' );
 			}
 		}
 
@@ -195,6 +209,24 @@
 			}		
 		}
 		
-	}	
+		// Shortcode create_function
+		function ac_do_shortcode_func( $atts ) {
+			$a = shortcode_atts( array(
+				'width' => '420',
+				'height' => '315',
+				'video_id' => '',
+			), $atts );
+			$youtube_video_width = $a['width'];
+			$youtube_video_height = $a['height'];			
+			$youtube_video_id = get_post_meta( get_the_ID(), 'ac_youtube_video_id', true );	
+			if ( $youtube_video_id != '' ) {
+				return '<iframe src="http://www.youtube.com/embed/'.$youtube_video_id.'?rel=0" frameborder="0" allowfullscreen width="'.$youtube_video_width.'" height="'.$youtube_video_height.'"></iframe>';
+			} else {
+				return '<h3>Sorry there is no video within the post!</h3>';
+			}	
+		}
+		
+	}
+$youtube_feed_2_wp_post = AppzCoder_Youtube_Feed_To_WP_Post::init();	
 
-$youtube_feed_2_wp_post = AppzCoder_Youtube_Feed_To_WP_Post::init();
+}	
