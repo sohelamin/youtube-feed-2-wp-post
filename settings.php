@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings page
+ * Settings Page
  *
  * @author Sohel Amin
 */
@@ -11,7 +11,6 @@ class AppzCoder_YouTube_Video_Settings {
      * Class constructor
      */	
 	public function __construct() {
-		$this->appzcoder_youtube_video_to_wp_post = null;
 		// create custom plugin settings menu
 		add_action( 'admin_menu', array($this, 'ac_youtube_video_2_wp_post_create_menu') );
 	}
@@ -110,8 +109,8 @@ class AppzCoder_YouTube_Video_Settings {
 		// Destroy the existing schedule
 		$this->appzcoder_youtube_video_to_wp_post->ac_yf2wp_deactivate();
 		// Setting up the user defined schedule
-		$this->appzcoder_youtube_video_to_wp_post->ac_yf2wp_activate( $new_value );
+		$this->appzcoder_youtube_video_to_wp_post->ac_yf2wp_activate( $new_value, false );
 		return $new_value;
 	}
 
-}	
+}
