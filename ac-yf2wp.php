@@ -11,7 +11,6 @@
 
 // Disallowed to call this file directly through url
 if ( !defined( 'ABSPATH' ) ) exit;
-require_once dirname( __FILE__ ) . '/settings.php';
 /**
  * YouTube Video to WP Post
  *
@@ -50,7 +49,8 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 
 		// Intiate settings page
 		if ( is_admin() ) {
-			new AppzCoder_YouTube_Video_Settings();
+			require_once dirname( __FILE__ ) . '/settings.php';
+			new AppzCoder_YouTube_Video_Settings;
 		}
 	}
 
@@ -88,8 +88,8 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 			'display' => __('Once a month')
 		);
 		return $schedules;
-	}
-	
+	}	
+
     /**
      * Calling cronjob schedule
      *
@@ -97,10 +97,11 @@ class AppzCoder_YouTube_Video_To_WP_Post {
      *
      * @return void
      */			
-	public function ac_yf2wp_activate( $recurrence ) {				
-		if ( !wp_next_scheduled( 'ac_custom_youtube_video_import' ) ) {
-			if(empty($recurrence)) { $recurrence='every_thirty_min'; }
-			update_option( 'ac_cron_job_schedule', $recurrence );
+	public function ac_yf2wp_activate( $recurrence = 'every_thirty_min', $opt_update = true ) {				
+		if ( ! wp_next_scheduled( 'ac_custom_youtube_video_import' ) ) {
+			if( $recurrence && $opt_update == true ) {
+				update_option( 'ac_cron_job_schedule', $recurrence );
+			}
 			wp_schedule_event( time(), $recurrence, 'ac_custom_youtube_video_import' );
 		}
 	}
@@ -114,7 +115,7 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 		if ( false !== ( $time = wp_next_scheduled( 'ac_custom_youtube_video_import' ) ) ) {
 		   wp_clear_scheduled_hook( 'ac_custom_youtube_video_import' );
 		}
-	}	
+	}
 	
 	/**
      * Video importing via youtube gdata api
