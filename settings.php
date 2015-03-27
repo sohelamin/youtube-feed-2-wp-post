@@ -14,8 +14,6 @@ class AppzCoder_YouTube_Video_Settings {
 		$this->appzcoder_youtube_video_to_wp_post = null;
 		// create custom plugin settings menu
 		add_action( 'admin_menu', array($this, 'ac_youtube_video_2_wp_post_create_menu') );
-		// update cronjob schedule upon update the option
-		add_filter( 'pre_update_option_ac_cron_job_schedule', array($this,'ac_cron_job_re_schedule'), 10, 2 );
 	}
 
     /**
@@ -40,6 +38,8 @@ class AppzCoder_YouTube_Video_Settings {
 		add_menu_page( 'Youtube Video 2 WP Post Plugin Settings', 'Youtube Video 2 WP Post Settings', 'administrator', __FILE__, array($this, 'ac_youtube_video_2_wp_post_settings_page'), plugins_url('/images/icon.png', __FILE__) );
 		// call register settings function
 		add_action( 'admin_init', array($this, 'register_ac_youtube_video_2_wp_post_settings') );
+		// update cronjob schedule upon update the option
+		add_filter( 'pre_update_option_ac_cron_job_schedule', array($this,'ac_cron_job_re_schedule'), 10, 2 );		
 	}
 
     /**
