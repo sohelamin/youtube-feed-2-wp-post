@@ -1,6 +1,6 @@
 <?php
 /**
- * YouTube Video Process
+ * Settings page
  *
  * @author Sohel Amin
 */
