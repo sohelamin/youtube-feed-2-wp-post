@@ -50,19 +50,24 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 		// Intiate settings page
 		if ( is_admin() ) {
 			require_once dirname( __FILE__ ) . '/settings.php';
-			new AppzCoder_YouTube_Video_Settings;
+			new AppzCoder_YouTube_Video_Settings();
+			require_once dirname( __FILE__ ) . '/inc/class-appzcoder-shortcode-tinymce.php';
 		}
+		
+		// Adding settings link on plugin page
+		$plugin = plugin_basename(__FILE__); 
+		add_filter("plugin_action_links_$plugin", array($this, 'ac_plugin_settings_link') );
 	}
 
     /**
      * Initiate the class as an object.
      *
-     * @return object
+     * @return Object
      */	
 	public static function init() {
 		static $instance = false;
 		if ( ! $instance ) {
-			$instance = new self;
+			$instance = new self();
 		}
 		return $instance;
 	}
@@ -70,9 +75,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Setting up cronjob time period
      *
-     * @param  array  $schedules
+     * @param Array $schedules
      *
-     * @return array
+     * @return Array
      */		
 	public function ac_add_new_cron_schedule( $schedules )	{
 	   $schedules['every_thirty_min'] = array ( 
@@ -93,9 +98,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Calling cronjob schedule
      *
-     * @param  array  $recurrence
+     * @param Array $recurrence
      *
-     * @return void
+     * @return Void
      */			
 	public function ac_yf2wp_activate( $recurrence = 'every_thirty_min', $opt_update = true ) {				
 		if ( ! wp_next_scheduled( 'ac_custom_youtube_video_import' ) ) {
@@ -109,7 +114,7 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Destroy the schedule
      *
-     * @return void
+     * @return Void
      */			
 	public function ac_yf2wp_deactivate() {
 		if ( false !== ( $time = wp_next_scheduled( 'ac_custom_youtube_video_import' ) ) ) {
@@ -120,7 +125,7 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 	/**
      * Video importing via youtube gdata api
      *
-     * @return boolean
+     * @return Boolean
      */	
 	public function ac_do_youtube_video_import() {
 		
@@ -187,9 +192,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * For XML Object to Array conversion
      *
-     * @param  object $result
+     * @param Object $result
      *
-     * @return array
+     * @return Array
      */			
 	function ac_xml2array ( $result, $out = array () ) {
 		foreach ( (array) $result as $index => $node )
@@ -200,9 +205,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Custom meta for video id
      *
-     * @param  array  $post
+     * @param Array $post
      *
-     * @return void
+     * @return Void
      */			
 	function ac_youtube_video_id( $post )
 	{		
@@ -218,9 +223,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Saving the video feed into post
      *
-     * @param  array  $data
+     * @param Array $data
      *
-     * @return void
+     * @return Void
      */			
 	function ac_insert_post( $data ) {		
 		// Getting all posts
@@ -253,9 +258,9 @@ class AppzCoder_YouTube_Video_To_WP_Post {
     /**
      * Shortcode creating function
      *
-     * @param  array  $stts
+     * @param Array $stts
      *
-     * @return void
+     * @return Void
      */			
 	function ac_do_shortcode_func( $atts ) {
 		$a = shortcode_atts( array(
@@ -271,6 +276,19 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 		} else {
 			return '<h3>Sorry there is no video within the post!</h3>';
 		}	
+	}
+
+    /**
+     * Add settings link on plugin page
+     *
+     * @param Array $links
+     *
+     * @return Array
+     */		
+	function ac_plugin_settings_link( $links ) { 
+		$settings_link = '<a href="admin.php?page=youtube-feed-2-wp-post/settings.php">Settings</a>'; 
+		array_unshift( $links, $settings_link ); 
+		return $links; 
 	}
 
 
