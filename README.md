@@ -1,4 +1,4 @@
-#YouTube Feed 2 WP Post
+#YouTube Video Feed 2 WP Post
 
 A wordpress plugin which is simply allow you to import your YouTube video feed as a post within a selective time.
 
