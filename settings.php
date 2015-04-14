@@ -18,19 +18,19 @@ class AppzCoder_YouTube_Video_Settings {
     /**
      * Initiate the class as an object.
      *
-     * @return object
+     * @return Object
      */	
 	public static function init() {
 		static $instance = false;
 		if ( ! $instance ) {
-			$instance = new self;
+			$instance = new self();
 		}
 	}
 
     /**
      * Creating option menu
      *
-     * @return void
+     * @return Void
      */
 	function ac_youtube_video_2_wp_post_create_menu() {
 		// create new top-level menu
@@ -44,7 +44,7 @@ class AppzCoder_YouTube_Video_Settings {
     /**
      * Register settings fields
      *
-     * @return void
+     * @return Void
      */
 	function register_ac_youtube_video_2_wp_post_settings() {
 		// register our settings
@@ -55,7 +55,7 @@ class AppzCoder_YouTube_Video_Settings {
     /**
      * Display options fields
      *
-     * @return void
+     * @return HTML
      */
 	function ac_youtube_video_2_wp_post_settings_page() {
 	?>
@@ -100,12 +100,12 @@ class AppzCoder_YouTube_Video_Settings {
     /**
      * Callback function for ac_cron_job_schedule field also it will destroy and re-schedule cronjob while calling.
      *
-     * @param  string  $new_value, $old_value
+     * @param  String  $new_value, $old_value
      *
-     * @return void
+     * @return Void
      */
 	function ac_cron_job_re_schedule( $new_value, $old_value ) {
-		$this->appzcoder_youtube_video_to_wp_post = new AppzCoder_YouTube_Video_To_WP_Post;
+		$this->appzcoder_youtube_video_to_wp_post = new AppzCoder_YouTube_Video_To_WP_Post();
 		// Destroy the existing schedule
 		$this->appzcoder_youtube_video_to_wp_post->ac_yf2wp_deactivate();
 		// Setting up the user defined schedule
