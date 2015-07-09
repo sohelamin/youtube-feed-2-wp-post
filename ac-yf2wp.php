@@ -3,7 +3,7 @@
  * Plugin Name: YouTube Video to WP Post
  * Plugin URI: http://www.appzcoder.com
  * Description: A wordpress plugin which is simply allow you to import your YouTube video feed as a post within a selective time.
- * Version: 1.2
+ * Version: 1.3
  * Author: Sohel Amin
  * Author URI: http://www.sohelamin.com
  * License: GPL2
@@ -128,63 +128,63 @@ class AppzCoder_YouTube_Video_To_WP_Post {
      * @return Boolean
      */	
 	public function ac_do_youtube_video_import() {
-		
+		require_once dirname( __FILE__ ) . '/inc/Youtube.php';
 		$youtube_id = get_option('ac_youtube_user_id'); 
 		//$youtube_id = 'UCnllbLq1u_SxHXzkauxZsPw'; 
-		// set feed URL
-		$feedURL = 'http://gdata.youtube.com/feeds/api/users/' .$youtube_id. '/uploads?v=2';
-		
-		// read feed into SimpleXML object
-		$sxml = simplexml_load_file( $feedURL );
-		
-		$video_array = array();
-		// iterate over entries in feed
-		foreach ( $sxml->entry as $entry ) {
 
-			// get nodes in media: namespace for media information
-			$media = $entry->children('http://search.yahoo.com/mrss/');
-			// get video player URL
-			$attrs = $media->group->player->attributes();
-			$watch = $attrs['url']; 
-			// get video player id
-			$yt = $media->children( 'http://gdata.youtube.com/schemas/2007' );
-			$youtubeid = $yt->videoid;		  
-			// get video thumbnail
-			$attrs = $media->group->thumbnail[0]->attributes();
-			$thumbnail = $attrs['url']; 
-			
-			// get video published date
-			$date = date('Y-m-d H:i:s', strtotime($entry->published));	
-			
-			// get <yt:duration> node for video length
-			$yt = $media->children('http://gdata.youtube.com/schemas/2007');
-			$attrs = $yt->duration->attributes();
-			$length = $attrs['seconds']; 
+		$youtube = new Youtube(array('key' => 'AIzaSyDDefsgXEZu57wYgABF7xEURClu4UAzyB8'));
 
-			// get <yt:stats> node for viewer statistics
-			$yt = $entry->children('http://gdata.youtube.com/schemas/2007');
-			$attrs = $yt->statistics->attributes();
-			$viewCount = $attrs['viewCount']; 
+		// Search only Videos in a given channel, Return an array of PHP objects
+		$videoList = $youtube->searchChannelVideos('', $youtube_id, 50, 'date');
 
-			// get <gd:rating> node for video ratings
-			$gd = $entry->children('http://schemas.google.com/g/2005'); 
-			if ( $gd->rating ) {
-				$attrs = $gd->rating->attributes();
-				$rating = $attrs['average']; 
-			} else {
-				$rating = 0; 
-			} 
-		
-			$videos['title'] = $this->ac_xml2array( $media->group->title );
-			$videos['video_id'] = $this->ac_xml2array( $youtubeid);
-			$videos['description'] = $this->ac_xml2array( $media->group->description );
-			$videos['view_count'] = $this->ac_xml2array( $viewCount );
-			$videos['date'] = $date;
-			$videos['category'] = $this->ac_xml2array( $media->group->category );
-			$videos['keyword'] = $this->ac_xml2array( $media->group->keyword );
+		$categoryList = array(
+		   	1 => 'Film & Animation',
+		   	2 => 'Autos & Vehicles',
+		    10 => 'Music',
+		    15 => 'Pets & Animals',
+		    17 => 'Sports',
+		    18 => 'Short Movies',
+		    19 => 'Travel & Events',
+		    20 => 'Gaming',
+		    21 => 'Videoblogging',
+		    22 => 'People & Blogs',
+		    23 => 'Comedy',
+		    24 => 'Entertainment',
+		    25 => 'News & Politics',
+		    26 => 'Howto & Style',
+		    27 => 'Education',
+		    28 => 'Science & Technology',
+		    29 => 'Nonprofits & Activism',
+		    30 => 'Movies',
+		    31 => 'Anime/Animation',
+		    32 => 'Action/Adventure',
+		    33 => 'Classics',
+		    34 => 'Comedy',
+		    35 => 'Documentary',
+		    36 => 'Drama',
+		    37 => 'Family',
+		    38 => 'Foreign',
+		    39 => 'Horror',
+		    40 => 'Sci-Fi/Fantasy',
+		    42 => 'Shorts',
+		    43 => 'Shows',
+		    44 => 'Trailers',
+		);
+
+		foreach ($videoList as $list) {
+			$videoInfo = $youtube->getVideoInfo($list->id->videoId);
+
+			$videos['title'] = $list->snippet->title;
+			$videos['video_id'] = $list->id->videoId;
+			$videos['description'] = $list->snippet->description;
+			$videos['view_count'] = $videoInfo->statistics->viewCount;
+			$videos['date'] = date( 'Y-m-d H:i:s', strtotime( $list->snippet->publishedAt ) );
+			$videos['category'] = $categoryList[$videoInfo->snippet->categoryId];
+			$videos['keyword'] = '';
 			
 			$video_array[] = $videos;
 		}
+
 		$result = $this->ac_insert_post( $video_array );
 		return $result;
 	}
@@ -233,17 +233,17 @@ class AppzCoder_YouTube_Video_To_WP_Post {
 			// Query for the meta key and meta value	
 			global $wpdb;
 			$meta_key = 'ac_youtube_video_id';
-			$insert_post_video_id = $insert_post['video_id'][0];
+			$insert_post_video_id = $insert_post['video_id'];
 			$table_name = $wpdb->prefix . 'postmeta';
 			$result = $wpdb->get_results( "SELECT meta_value FROM  $table_name WHERE meta_key='$meta_key' AND meta_value='$insert_post_video_id'" );
 			if ( count($result)==0 ) {				
 				// Getting category id
-				$category_id = get_cat_ID( $insert_post['category'][0] );
+				$category_id = get_cat_ID( $insert_post['category'] );
 				// Create post object
 				$user_id = get_current_user_id();
 				$my_post = array(
-				  'post_title'    => $insert_post['title'][0],
-				  'post_content'  => $insert_post['description'][0],
+				  'post_title'    => $insert_post['title'],
+				  'post_content'  => $insert_post['description'],
 				  'post_status'   => 'publish',
 				  'post_author'   => 1,
 				  'post_category' => array( $category_id ) 
