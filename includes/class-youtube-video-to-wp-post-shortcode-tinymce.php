@@ -30,13 +30,13 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
      *
      * @return static
      */
-	public static function init() {
+    public static function init() {
         if (null === static::$instance) {
             static::$instance = new static();
         }
 
         return static::$instance;
-	}
+    }
 
     /**
      * Create a shortcode button for tinymce
