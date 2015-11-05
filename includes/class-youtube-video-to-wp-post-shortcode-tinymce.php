@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
@@ -8,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @author Sohel Amin
 */
 class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
-
     /**
      * Instance of this class.
      *
@@ -17,7 +15,7 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
     protected static $instance;
 
     /**
-     * __construct function.
+     * Constructor function.
      *
      * @access public
      * @return void
@@ -31,7 +29,7 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
      * Instantiate the class as an object.
      *
      * @return static
-     */	
+     */
 	public static function init() {
         if (null === static::$instance) {
             static::$instance = new static();
@@ -43,7 +41,7 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
     /**
      * Create a shortcode button for tinymce
      *
-     * @return Void
+     * @return void
      */
     public function ac_shortcode_button() {
         if( current_user_can('edit_posts') && current_user_can('edit_pages') ) {
@@ -53,33 +51,35 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
     }
 
     /**
-     * Add new Javascript to the plugin scrippt array
+     * Add new javascript to the plugin script array
      *
-     * @param  Array $plugin_array
+     * @param  array $plugin_array
      *
-     * @return Array
+     * @return array
      */
     public function ac_add_buttons( $plugin_array ) {
         $plugin_array['pushortcodes'] = plugin_dir_url( __FILE__ ) . '../js/shortcode-tinymce-button.js';
+
         return $plugin_array;
     }
 
     /**
      * Add new button to tinymce
      *
-     * @param  Array $buttons
+     * @param  array $buttons
      *
-     * @return Array
+     * @return array
      */
     public function ac_register_buttons( $buttons ) {
         array_push( $buttons, 'separator', 'pushortcodes' );
+
         return $buttons;
     }
 
     /**
      * Add shortcode JS to the page
      *
-     * @return HTML
+     * @return void
      */
     public function ac_get_shortcodes() {
         global $shortcode_tags;
@@ -96,7 +96,6 @@ class YouTube_Video_To_WP_Post_Shortcode_Tinymce {
 
         echo '</script>';
     }
-
 }
 
 YouTube_Video_To_WP_Post_Shortcode_Tinymce::init();
