@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
@@ -8,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  * @author Sohel Amin
 */
 class YouTube_Video_To_WP_Post_Settings {
-
     /**
      * Instance of this class.
      *
@@ -19,7 +17,7 @@ class YouTube_Video_To_WP_Post_Settings {
 	public $youtube_video_to_wp_post;
 	
 	/**
-	 * __construct function.
+	 * Constructor function.
 	 *
 	 * @access public
 	 * @return void
