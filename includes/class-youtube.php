@@ -35,9 +35,11 @@ class Youtube
 
     /**
      * Constructor
+     *
      * $youtube = new Youtube(array('key' => 'KEY HERE'))
      *
      * @param array $params
+     *
      * @throws \Exception
      */
     public function __construct($params = array())
@@ -57,8 +59,12 @@ class Youtube
     }
 
     /**
+     * Get video info
+     *
      * @param $vId
+     *
      * @return \StdClass
+     *
      * @throws \Exception
      */
     public function getVideoInfo($vId)
@@ -71,12 +77,17 @@ class Youtube
         );
 
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeSingle($apiData);
     }
 
     /**
+     * Get videos info
+     *
      * @param $vIds
+     *
      * @return \StdClass
+     *
      * @throws \Exception
      */
     public function getVideosInfo($vIds)
@@ -89,6 +100,7 @@ class Youtube
         );
 
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeList($apiData);
     }
 
@@ -98,6 +110,7 @@ class Youtube
      *
      * @param $q
      * @param int $maxResults
+     *
      * @return array
      */
     public function search($q, $maxResults = 10)
@@ -107,6 +120,7 @@ class Youtube
             'part' => 'id, snippet',
             'maxResults' => $maxResults,
         );
+
         return $this->searchAdvanced($params);
     }
 
@@ -116,6 +130,7 @@ class Youtube
      * @param  string $q Query
      * @param  integer $maxResults number of results to return
      * @param  string $order Order by
+     *
      * @return \StdClass  API results
      */
     public function searchVideos($q, $maxResults = 10, $order = null)
@@ -126,6 +141,7 @@ class Youtube
             'part' => 'id, snippet',
             'maxResults' => $maxResults,
         );
+
         if (!empty($order)) {
             $params['order'] = $order;
         }
@@ -140,6 +156,7 @@ class Youtube
      * @param  string $channelId
      * @param  integer $maxResults
      * @param  string $order
+     *
      * @return object
      */
     public function searchChannelVideos($q, $channelId, $maxResults = 10, $order = null)
@@ -151,11 +168,12 @@ class Youtube
             'part' => 'id, snippet',
             'maxResults' => $maxResults,
         );
+
         if (!empty($order)) {
             $params['order'] = $order;
         }
 
-        return $this->searchAdvanced($params);
+        return $this->searchAdvanced($params, true);
     }
 
     /**
@@ -164,7 +182,9 @@ class Youtube
      *
      * @param $params
      * @param $pageInfo
+     *
      * @return array
+     *
      * @throws \Exception
      */
     public function searchAdvanced($params, $pageInfo = false)
@@ -192,6 +212,7 @@ class Youtube
      *
      * @param $params
      * @param $token
+     *
      * @return array
      */
     public function paginateResults($params, $token = null)
@@ -203,12 +224,15 @@ class Youtube
         if (!empty($params)) {
             return $this->searchAdvanced($params, true);
         }
-
     }
 
     /**
+     * Get channel by name
+     *
      * @param $username
+     *
      * @return \StdClass
+     *
      * @throws \Exception
      */
     public function getChannelByName($username, $optionalParams = false)
@@ -226,8 +250,12 @@ class Youtube
     }
 
     /**
+     * Get channel by id
+     *
      * @param $id
+     *
      * @return \StdClass
+     *
      * @throws \Exception
      */
     public function getChannelById($id, $optionalParams = false)
@@ -237,17 +265,24 @@ class Youtube
             'id' => $id,
             'part' => 'id,snippet,contentDetails,statistics,invideoPromotion',
         );
+
         if ($optionalParams) {
             $params = array_merge($params, $optionalParams);
         }
+
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeSingle($apiData);
     }
 
     /**
+     * Get playlists by channel id
+     *
      * @param $channelId
      * @param array $optionalParams
+     *
      * @return array
+     *
      * @throws \Exception
      */
     public function getPlaylistsByChannelId($channelId, $optionalParams = array())
@@ -257,16 +292,23 @@ class Youtube
             'channelId' => $channelId,
             'part' => 'id, snippet, status',
         );
+
         if ($optionalParams) {
             $params = array_merge($params, $optionalParams);
         }
+
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeList($apiData);
     }
 
     /**
+     * Get playlist by id
+     *
      * @param $id
+     *
      * @return \StdClass
+     *
      * @throws \Exception
      */
     public function getPlaylistById($id)
@@ -276,13 +318,19 @@ class Youtube
             'id' => $id,
             'part' => 'id, snippet, status',
         );
+
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeSingle($apiData);
     }
 
     /**
+     * Get playlist items by playlist id
+     *
      * @param $playlistId
+     *
      * @return array
+     *
      * @throws \Exception
      */
     public function getPlaylistItemsByPlaylistId($playlistId, $maxResults = 50)
@@ -293,13 +341,19 @@ class Youtube
             'part' => 'id, snippet, contentDetails, status',
             'maxResults' => $maxResults,
         );
+
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeList($apiData);
     }
 
     /**
+     * Get activities by channel id
+     *
      * @param $channelId
+     *
      * @return array
+     *
      * @throws \Exception
      */
     public function getActivitiesByChannelId($channelId)
@@ -307,12 +361,15 @@ class Youtube
         if (empty($channelId)) {
             throw new \InvalidArgumentException('ChannelId must be supplied');
         }
+
         $API_URL = $this->getApi('activities');
         $params = array(
             'channelId' => $channelId,
             'part' => 'id, snippet, contentDetails',
         );
+
         $apiData = $this->api_get($API_URL, $params);
+
         return $this->decodeList($apiData);
     }
 
@@ -321,17 +378,21 @@ class Youtube
      * Support both full URL (www.youtube.com) and short URL (youtu.be)
      *
      * @param  string $youtube_url
+     *
      * @throws \Exception
+     *
      * @return string Video Id
      */
     public static function parseVIdFromURL($youtube_url)
     {
         if (strpos($youtube_url, 'youtube.com')) {
             $params = static::_parse_url_query($youtube_url);
+
             return $params['v'];
         } else if (strpos($youtube_url, 'youtu.be')) {
             $path = static::_parse_url_path($youtube_url);
             $vid = substr($path, 1);
+
             return $vid;
         } else {
             throw new \Exception('The supplied URL does not look like a Youtube URL');
@@ -342,7 +403,9 @@ class Youtube
      * Get the channel object by supplying the URL of the channel page
      *
      * @param  string $youtube_url
+     *
      * @throws \Exception
+     *
      * @return object Channel object
      */
     public function getChannelFromURL($youtube_url)
@@ -372,7 +435,10 @@ class Youtube
      */
 
     /**
+     * Get An API
+     *
      * @param $name
+     *
      * @return mixed
      */
     public function getApi($name)
@@ -385,7 +451,9 @@ class Youtube
      * (Don't use this to decode the response containing list of objects)
      *
      * @param  string $apiData the api response from youtube
+     *
      * @throws \Exception
+     *
      * @return \StdClass  an Youtube resource object
      */
     public function decodeSingle(&$apiData)
@@ -396,9 +464,11 @@ class Youtube
             if (isset($resObj->error->errors[0])) {
                 $msg .= " : " . $resObj->error->errors[0]->reason;
             }
+
             throw new \Exception($msg, $resObj->error->code);
         } else {
             $itemsArray = $resObj->items;
+
             if (!is_array($itemsArray) || count($itemsArray) == 0) {
                 return false;
             } else {
@@ -411,7 +481,9 @@ class Youtube
      * Decode the response from youtube, extract the list of resource objects
      *
      * @param  string $apiData response string from youtube
+     *
      * @throws \Exception
+     *
      * @return array Array of StdClass objects
      */
     public function decodeList(&$apiData)
@@ -422,6 +494,7 @@ class Youtube
             if (isset($resObj->error->errors[0])) {
                 $msg .= " : " . $resObj->error->errors[0]->reason;
             }
+
             throw new \Exception($msg, $resObj->error->code);
         } else {
             $this->page_info = array(
@@ -432,9 +505,11 @@ class Youtube
                 'prevPageToken' => null,
                 'nextPageToken' => null,
             );
+
             if (isset($resObj->prevPageToken)) {
                 $this->page_info['prevPageToken'] = $resObj->prevPageToken;
             }
+
             if (isset($resObj->nextPageToken)) {
                 $this->page_info['nextPageToken'] = $resObj->nextPageToken;
             }
@@ -453,7 +528,9 @@ class Youtube
      *
      * @param $url
      * @param $params
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     public function api_get($url, $params)
@@ -469,14 +546,18 @@ class Youtube
         } else {
             curl_setopt($tuCurl, CURLOPT_PORT, 443);
         }
+
         if ($this->referer !== null) {
             curl_setopt($tuCurl, CURLOPT_REFERER, $this->referer);
         }
+
         curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
         $tuData = curl_exec($tuCurl);
+
         if (curl_errno($tuCurl)) {
             throw new \Exception('Curl Error : ' . curl_error($tuCurl), curl_errno($tuCurl));
         }
+
         return $tuData;
     }
 
@@ -484,11 +565,13 @@ class Youtube
      * Parse the input url string and return just the path part
      *
      * @param  string $url the URL
+     *
      * @return string      the path string
      */
     public static function _parse_url_path($url)
     {
         $array = parse_url($url);
+
         return $array['path'];
     }
 
@@ -496,6 +579,7 @@ class Youtube
      * Parse the input url string and return an array of query params
      *
      * @param  string $url the URL
+     *
      * @return array      array of query params
      */
     public static function _parse_url_query($url)
@@ -510,6 +594,7 @@ class Youtube
             $item = explode('=', $param);
             $params[$item[0]] = empty($item[1]) ? '' : $item[1];
         }
+
         return $params;
     }
 }

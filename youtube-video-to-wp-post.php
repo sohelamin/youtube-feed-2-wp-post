@@ -87,6 +87,11 @@ class Appzcoder_YouTube_Video_To_WP_Post {
             }
         } );
 
+        // Adding shortcode for preview the youtube video on frontend
+        add_shortcode( 'yt2wp_show_youtube_video', 'yt2wp_do_shortcode_func' );
+
+        add_action( 'wp_ajax_yt2wp_import', 'yt2wp_import_ajax_handler' );
+
         // Filter hooks
         add_filter( 'cron_schedules', 'yt2wp_add_new_cron_schedule' );
 

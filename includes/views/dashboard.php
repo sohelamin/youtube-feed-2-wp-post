@@ -2,6 +2,8 @@
     <h2><?php _e( 'YouTube Video to WP Post', 'youtube-feed-2-wp-post' ); ?></h2>
     <?php
         delete_option( 'yt2wp_import_attempt' );
+        delete_option( 'yt2wp_youtube_next_page_token' );
+
         $categories = get_categories();
     ?>
 
@@ -11,7 +13,7 @@
                 <tr valign="top">
                     <th scope="row"><?php _e( 'YouTube User ID', 'youtube-feed-2-wp-post' ); ?></th>
                     <td>
-                        <input type="text" name="yt2wp_youtube_user_id" value="<?php echo get_option( 'yt2wp_youtube_user_id', null ); ?>" /> <a title="Click here for help." target="_blank" href="https://support.google.com/youtube/answer/3250431?hl=en"><strong>?</strong></a>
+                        <input type="text" name="youtube_user_id" value="<?php echo get_option( 'yt2wp_youtube_user_id', null ); ?>" /> <a title="Click here for help." target="_blank" href="https://support.google.com/youtube/answer/3250431?hl=en"><strong>?</strong></a>
                         <p class="description"><?php _e( 'You can set custom YouTube User ID or Channel ID to import.', 'youtube-feed-2-wp-post' ); ?></p>
                     </td>
                 </tr>

@@ -38,7 +38,7 @@ class Shortcode_Tinymce {
      * @return array
      */
     public function add_buttons( $plugin_array ) {
-        $plugin_array['pushortcodes'] = plugin_dir_url( __FILE__ ) . '../js/shortcode-tinymce-button.js';
+        $plugin_array['pushortcodes'] = YT2WP_URL . '/assets/js/shortcode-tinymce-button.js';
 
         return $plugin_array;
     }
