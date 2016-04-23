@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: sohelamin
 Tags: youtube, post, youtube video, appzcoder, sohelamin
-Requires at least: 3.6
-Tested up to: 4.3
-Stable tag: 4.3
+Requires at least: 3.8
+Tested up to: 4.5
+Stable tag: 4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Features:
 3. `/assets/screenshot-3.png`
 
 == Changelog ==
+
+= 1.5 =
+* Updated.
 
 = 1.4 =
 * Re-factored codes.

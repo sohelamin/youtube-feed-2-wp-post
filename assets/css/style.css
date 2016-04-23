@@ -1,0 +1,21 @@
+#yt2wp_import_form .import-loader {
+    background: url('../images/spinner-2x.gif') no-repeat;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: cover;
+}
+#yt2wp_import_form #response_div {
+    width: 500px;
+}
+#yt2wp_import_form #response_div span {
+    font-size: 14px;
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    display: block;
+}
