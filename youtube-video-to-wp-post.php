@@ -28,6 +28,9 @@ class Appzcoder_YouTube_Video_To_WP_Post {
     public function __construct() {
         // load the plugin
         add_action( 'init', [ $this, 'plugin_init' ] );
+
+        register_activation_hook( __FILE__, [ $this, 'plugin_activate' ] );
+        register_deactivation_hook( __FILE__, [ $this, 'plugin_deactivate' ] );
     }
 
     /**
@@ -41,6 +44,24 @@ class Appzcoder_YouTube_Video_To_WP_Post {
         }
 
         return static::$instance;
+    }
+
+    /**
+     * Plugin activation hook.
+     *
+     * @return void
+     */
+    function plugin_activate() {
+        // Activation code here...
+    }
+
+    /**
+     * Plugin deactivation hook.
+     *
+     * @return void
+     */
+    function plugin_deactivate() {
+        wp_clear_scheduled_hook( 'yt2wp_youtube_video_import' );
     }
 
     /**

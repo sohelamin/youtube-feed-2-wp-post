@@ -110,18 +110,10 @@ class Admin_Menu {
                         </td>
                     </tr>
                     <tr valign="top">
-                        <th scope="row"><?php _e( 'YouTube User ID', 'youtube-feed-2-wp-post' ); ?></th>
-                        <td>
-                            <input type="text" name="yt2wp_youtube_user_id" value="<?php echo get_option( 'yt2wp_youtube_user_id', null ); ?>" /> <a title="Click here for help." target="_blank" href="https://support.google.com/youtube/answer/3250431?hl=en"><strong>?</strong></a>
-                            <p class="description"><?php _e( 'Enter your YouTube User ID or Channel ID.', 'youtube-feed-2-wp-post' ); ?></p>
-                        </td>
-                    </tr>
-                    <tr valign="top">
                         <th scope="row"><?php _e( 'Interval Time', 'youtube-feed-2-wp-post' ); ?></th>
                         <td>
                             <?php
                                 $schedules = [
-                                    'every_thirty_min' =>  'Every 30 Minutes',
                                     'hourly'           =>  'Once Hourly',
                                     'twicedaily'       =>  'Twice Daily',
                                     'daily'            =>  'Once Daily',
@@ -136,6 +128,30 @@ class Admin_Menu {
                             <?php endforeach; ?>
                             </select>
                             <p class="description"><?php _e( 'Set interval time to automatically import videos.', 'youtube-feed-2-wp-post' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><?php _e( 'YouTube User ID', 'youtube-feed-2-wp-post' ); ?></th>
+                        <td>
+                            <input type="text" name="yt2wp_youtube_user_id" value="<?php echo get_option( 'yt2wp_youtube_user_id', null ); ?>" /> <a title="Click here for help." target="_blank" href="https://support.google.com/youtube/answer/3250431?hl=en"><strong>?</strong></a>
+                            <p class="description"><?php _e( 'Enter your YouTube User ID or Channel ID.', 'youtube-feed-2-wp-post' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><?php _e( 'Post Category', 'youtube-feed-2-wp-post' ); ?></th>
+                        <td>
+                            <select name="yt2wp_post_category">
+                                <option value="" selected="selected"><?php _e( '&mdash; Select Category &mdash;', 'youtube-feed-2-wp-post' ); ?></option>
+                                <?php
+                                $categories = get_categories();
+                                foreach ( $categories as $category ) {
+                                ?>
+                                    <option value="<?php echo $category->cat_ID; ?>" <?php echo get_option( 'yt2wp_post_category' ) == $category->cat_ID ? 'selected' : ''; ?>><?php _e( $category->name, 'youtube-feed-2-wp-post' ); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                            <p class="description"><?php _e( 'Set default category to import videos.', 'youtube-feed-2-wp-post' ); ?></p>
                         </td>
                     </tr>
                     <?php
@@ -159,5 +175,6 @@ class Admin_Menu {
         register_setting( 'yt2wp-settings-group', 'yt2wp_auto_import' );
         register_setting( 'yt2wp-settings-group', 'yt2wp_youtube_user_id' );
         register_setting( 'yt2wp-settings-group', 'yt2wp_cron_job_schedule' );
+        register_setting( 'yt2wp-settings-group', 'yt2wp_post_category' );
     }
 }

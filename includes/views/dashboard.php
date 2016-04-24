@@ -21,7 +21,7 @@
                     <th scope="row"><?php _e( 'Post Category', 'youtube-feed-2-wp-post' ); ?></th>
                     <td>
                         <select name="post_category">
-                            <option value="new" selected="selected"><?php _e( 'New Category', 'youtube-feed-2-wp-post' ); ?></option>
+                            <option value="" selected="selected"><?php _e( '&mdash; Select Category &mdash;', 'youtube-feed-2-wp-post' ); ?></option>
                             <?php
                             foreach ( $categories as $category ) {
                             ?>

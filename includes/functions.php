@@ -37,7 +37,7 @@ function yt2wp_enqueue_js() { ?>
                     } else {
                         submit.removeAttr('disabled');
                         loader.hide();
-                        responseDiv.html('');
+                        responseDiv.html( '<span>Successfully imported all videos.</span>' );
                     }
                 }
             });
@@ -64,10 +64,6 @@ function yt2wp_get_api_key() {
  * @return array
  */
 function yt2wp_add_new_cron_schedule( $schedules )  {
-    $schedules['every_thirty_min'] = [
-        'interval' => 1800,
-        'display'  => __('Every 30 Minutes')
-    ];
     $schedules['weekly'] = [
         'interval' => 604800,
         'display'  => __('Once Weekly')
@@ -118,10 +114,10 @@ function yt2wp_destroy_cronjob_schedule() {
  */
 function yt2wp_get_youtube_videos( $args = [] ) {
     $defaults = [
-        'number'  => 50,
-        'nextPageToken'  => null,
-        'orderby' => 'date',
-        'count'   => false,
+        'number'        => 50,
+        'nextPageToken' => null,
+        'orderby'       => 'date',
+        'count'         => false,
     ];
 
     $args = wp_parse_args( $args, $defaults );
@@ -150,40 +146,6 @@ function yt2wp_get_youtube_videos( $args = [] ) {
     // Search only Videos in a given channel, Return an array of PHP objects
     $videos_list = $youtube->paginateResults( $params, $args['nextPageToken'] );
 
-    $categories_list = [
-        1  => 'Film & Animation',
-        2  => 'Autos & Vehicles',
-        10 => 'Music',
-        15 => 'Pets & Animals',
-        17 => 'Sports',
-        18 => 'Short Movies',
-        19 => 'Travel & Events',
-        20 => 'Gaming',
-        21 => 'Videoblogging',
-        22 => 'People & Blogs',
-        23 => 'Comedy',
-        24 => 'Entertainment',
-        25 => 'News & Politics',
-        26 => 'Howto & Style',
-        27 => 'Education',
-        28 => 'Science & Technology',
-        29 => 'Nonprofits & Activism',
-        30 => 'Movies',
-        31 => 'Anime/Animation',
-        32 => 'Action/Adventure',
-        33 => 'Classics',
-        34 => 'Comedy',
-        35 => 'Documentary',
-        36 => 'Drama',
-        37 => 'Family',
-        38 => 'Foreign',
-        39 => 'Horror',
-        40 => 'Sci-Fi/Fantasy',
-        42 => 'Shorts',
-        43 => 'Shows',
-        44 => 'Trailers',
-    ];
-
     $videos_array = [];
 
     if ( ! empty( $videos_list ) ) {
@@ -192,20 +154,15 @@ function yt2wp_get_youtube_videos( $args = [] ) {
         foreach ( $videos_list['results'] as $list ) {
             $videoInfo = $youtube->getVideoInfo( $list->id->videoId );
 
-            $videos['title']       = $list->snippet->title;
-            $videos['video_id']    = $list->id->videoId;
-            $videos['description'] = $list->snippet->description;
+            $video['title']       = $list->snippet->title;
+            $video['video_id']    = $list->id->videoId;
+            $video['description'] = '[ac_show_youtube_video width="640" height="360"]'; // Shortcode
 
-            // if (true) {
-            //     $videos['description'] .= '';
-            // }
+            $video['view_count']  = $videoInfo->statistics->viewCount;
+            $video['date']        = date( 'Y-m-d H:i:s', strtotime( $list->snippet->publishedAt ) );
+            $video['keyword']     = '';
 
-            $videos['view_count']  = $videoInfo->statistics->viewCount;
-            $videos['date']        = date( 'Y-m-d H:i:s', strtotime( $list->snippet->publishedAt ) );
-            $videos['category']    = $categories_list[$videoInfo->snippet->categoryId];
-            $videos['keyword']     = '';
-
-            $videos_array[] = $videos;
+            $videos_array[] = $video;
         }
     }
 
@@ -219,6 +176,16 @@ function yt2wp_get_youtube_videos( $args = [] ) {
  */
 function yt2wp_do_youtube_video_import() {
     $videos_array = yt2wp_get_youtube_videos();
+
+    $category_id = get_option( 'yt2wp_post_category', null);
+
+    if ( ! empty( $category_id ) ) {
+        $videos_array = array_map( function( $item ) use ( $category_id ) {
+            $item['category'] = $category_id;
+
+            return $item;
+        }, $videos_array );
+    }
 
     $result = yt2wp_insert_post( $videos_array );
 
@@ -262,8 +229,6 @@ function yt2wp_insert_post( $data ) {
         $result = $wpdb->get_results( "SELECT meta_value FROM  $table_name WHERE meta_key='$meta_key' AND meta_value='$insert_post_video_id'" );
 
         if ( count( $result ) == 0 ) {
-            // Getting category id
-            $category_id = get_cat_ID( $insert_post['category'] );
             // Create post object
             $user_id = get_current_user_id();
             $my_post = [
@@ -271,8 +236,11 @@ function yt2wp_insert_post( $data ) {
               'post_content'  => $insert_post['description'],
               'post_status'   => 'publish',
               'post_author'   => $user_id,
-              'post_category' => [ $category_id ]
             ];
+
+            if ( ! empty( $insert_post['category'] ) ) {
+                $my_post['post_category'] = [ $insert_post['category'] ];
+            }
 
             // Insert the post into the database
             $post_id = wp_insert_post( $my_post );
@@ -373,6 +341,14 @@ function yt2wp_import_ajax_handler() {
     $videos_array = yt2wp_get_youtube_videos( [ 'number' => $limit, 'nextPageToken' => $nextPageToken ] );
 
     update_option( 'yt2wp_youtube_next_page_token', $videos_array['nextPageToken'] );
+
+    if ( ! empty( $category_id ) ) {
+        $videos_array = array_map( function( $item ) use ( $category_id ) {
+            $item['category'] = $category_id;
+
+            return $item;
+        }, $videos_array );
+    }
 
     yt2wp_insert_post( $videos_array );
 
