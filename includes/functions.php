@@ -156,7 +156,7 @@ function yt2wp_get_youtube_videos( $args = [] ) {
 
             $video['title']       = $list->snippet->title;
             $video['video_id']    = $list->id->videoId;
-            $video['description'] = '[ac_show_youtube_video width="640" height="360"]'; // Shortcode
+            $video['description'] = '[yt2wp_show_youtube_video width="640" height="360"]'; // Shortcode
 
             $video['view_count']  = $videoInfo->statistics->viewCount;
             $video['date']        = date( 'Y-m-d H:i:s', strtotime( $list->snippet->publishedAt ) );
@@ -259,8 +259,8 @@ function yt2wp_insert_post( $data ) {
  */
 function yt2wp_do_shortcode_func( $atts ) {
     $a = shortcode_atts( [
-        'width'    => '420',
-        'height'   => '315',
+        'width'    => '640',
+        'height'   => '360',
         'video_id' => '',
     ], $atts );
 

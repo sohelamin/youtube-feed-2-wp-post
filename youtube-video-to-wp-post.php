@@ -81,12 +81,10 @@ class Appzcoder_YouTube_Video_To_WP_Post {
         // Includes required files
         include YT2WP_INCLUDES . '/functions.php';
         include YT2WP_INCLUDES . '/class-admin-menu.php';
-        include YT2WP_INCLUDES . '/class-shortcode-tinymce.php';
         include YT2WP_INCLUDES . '/class-youtube.php';
 
         // Instantiate classes
         new Admin_Menu();
-        new Shortcode_Tinymce();
 
         // Action hooks
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );

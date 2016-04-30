@@ -25,7 +25,7 @@ Features:
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Put your YouTube user's/channel's id in plugin's setting page.
 4. Select the interval time when you want to update the feed automatically.
-5. Put the Short Code [ac_show_youtube_video width="420" height="345"] inside your post or put the code `<?php echo do_shortcode( '[ac_show_youtube_video width="420" height="345"]' ); ?>` to your template page where the post loop exist.
+5. Put the Short Code [yt2wp_show_youtube_video width="640" height="360"] inside your post or put the code `<?php echo do_shortcode( '[yt2wp_show_youtube_video width="640" height="360"]' ); ?>` to your template page where the post loop exist.
 
 == Screenshots ==
 
@@ -36,7 +36,11 @@ Features:
 == Changelog ==
 
 = 1.5 =
-* Updated.
+* Allow to set custom youtube id while importing videos.
+* Allow to set default channel or user id & post category.
+* Allow to import all youtube videos from a channel.
+* Removed TinyMCE Button.
+* Refactored.
 
 = 1.4 =
 * Re-factored codes.
