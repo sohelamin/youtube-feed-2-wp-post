@@ -26,8 +26,8 @@ class Admin_Menu {
      */
     public function admin_menu() {
         add_menu_page( 'YouTube Video to WP Post', 'YouTube Video to WP Post', 'manage_options', 'youtube-video-to-wp-post', [ $this, 'plugin_page' ], plugins_url( '/../assets/images/icon.png', __FILE__ ) );
-        add_submenu_page( 'youtube-video-to-wp-post', __( 'General', 'erp' ), __( 'General', 'erp' ), 'manage_options', 'youtube-video-to-wp-post', [ $this, 'plugin_page' ] );
-        add_submenu_page( 'youtube-video-to-wp-post', __( 'Settings', 'erp' ), __( 'Settings', 'erp' ), 'manage_options', 'youtube-video-to-wp-post-settings', [ $this, 'settings_page' ] );
+        add_submenu_page( 'youtube-video-to-wp-post', __( 'General', 'youtube-feed-2-wp-post' ), __( 'General', 'youtube-feed-2-wp-post' ), 'manage_options', 'youtube-video-to-wp-post', [ $this, 'plugin_page' ] );
+        add_submenu_page( 'youtube-video-to-wp-post', __( 'Settings', 'youtube-feed-2-wp-post' ), __( 'Settings', 'youtube-feed-2-wp-post' ), 'manage_options', 'youtube-video-to-wp-post-settings', [ $this, 'settings_page' ] );
     }
 
     /**
